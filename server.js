@@ -2,7 +2,12 @@
 const express = require("express");
 const server = express();
 const cors = require("cors");
-server.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+server.use(
+  cors({
+    credentials: true,
+    origin: ["http://localhost:3000", "emptyindigo.com"],
+  })
+);
 const bodyParser = require("body-parser");
 server.use(bodyParser.json());
 const bcrypt = require("bcrypt");
@@ -180,6 +185,7 @@ server.get("/authors", async (req, res) => {
   });
 });
 
+//bind to the correct port that AWS assigns us
 server.get("/author/:id", async (req, res) => {
   res.send({
     posts: await Post.findAll({ where: { authorID: req.params.id } }),
@@ -189,34 +195,12 @@ server.get("/author/:id", async (req, res) => {
   });
 });
 
+let port = 3001;
+if (process.env.PORT) {
+  port = process.env.PORT;
+}
+
 //#9 run express API server in background to listen for incoming requests
-server.listen(3001, () => {
+server.listen(port, () => {
   console.log("Server running.");
 });
-
-//#10 seeding the database
-const createFirstUser = async () => {
-  const users = await User.findAll({});
-  if (users.length === 0) {
-    User.create({
-      email: "max",
-      password: bcrypt.hashSync("supersecret", 10),
-    });
-  }
-};
-
-createFirstUser();
-
-const createSecondUser = async () => {
-  const secondUser = await User.findOne({
-    where: { email: "testymctesterson" },
-  });
-  if (!secondUser) {
-    User.create({
-      email: "testymctesterson",
-      password: bcrypt.hashSync("secret", 10),
-    });
-  }
-};
-
-createSecondUser();
