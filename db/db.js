@@ -1,5 +1,6 @@
 //#3 setup DB models
 const Sequelize = require("sequelize");
+import bcrypt from "bcrypt";
 
 let db;
 if (process.env.RDS_HOSTNAME) {
